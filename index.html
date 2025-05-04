@@ -202,11 +202,13 @@
     /* Mobile: always pulse + show tooltip */
     @media (hover: none) and (pointer: coarse) {
       svg#Layer_1 {
-        animation: colorPulse 3s infinite;
+        animation: colorPulse 3s 2 ease-in-out;
+        animation-fill-mode: forwards;
       }
 
       #themeToggle svg {
-        animation: colorPulse 2s infinite;
+        animation: colorPulse 2s 2 ease-in-out;
+        animation-fill-mode: forwards;
       }
 
       .rad-tooltip {
