@@ -254,6 +254,25 @@
         font-size: 1rem;
       }
     }
+
+      footer {
+        margin-top: 40px;
+        padding: 20px;
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.8rem;
+        color: #999;
+        text-align: center;
+      }
+
+      /* Optional: Theme-based color override */
+      body.theme-magenta footer {
+        color: #dd0f66;
+      }
+
+      body.theme-orange footer {
+      color: #fe7d0b;
+      }
+
   </style>
 </head>
 <body class="theme-magenta">
@@ -337,5 +356,9 @@
       document.body.classList.toggle("theme-orange");
     });
   </script>
+  <footer id="siteFooter">
+    &copy; 2025 Make It Radder LLC. All rights reserved.
+  </footer>
+  
 </body>
 </html>
