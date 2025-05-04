@@ -201,12 +201,9 @@
 
     /* Mobile: always pulse + show tooltip */
     @media (hover: none) and (pointer: coarse) {
-      svg#Layer_1 {
-        animation: colorPulse 3s 2 ease-in-out;
-      }
-
+      
       #themeToggle svg {
-        animation: colorPulse 2s 2 ease-in-out;
+        animation: colorPulse 3s infinite;
       }
 
       .rad-tooltip {
@@ -227,7 +224,7 @@
 
       @media (max-width: 900px) {
         body {
-        padding: 0 40px; /* adds horizontal padding */
+        padding: 0 50px; /* adds horizontal padding */
         box-sizing: border-box;
       }
 
@@ -250,11 +247,11 @@
 
       form {
         width: 80%;
-        max-width: 225px;
+        max-width: 275px;
       }
 
       button {
-        font-size: 0.8rem;
+        font-size: 1rem;
       }
     }
   </style>
