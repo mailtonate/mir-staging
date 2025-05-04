@@ -78,12 +78,23 @@
     button {
       font-family: 'Rajdhani', sans-serif;
       font-size: 1rem;
-      appearance: none;
-      background-color: #eee;
-      color: #222;
-      border: 1px solid #aaa;
+      background-color: transparent;
+      color: currentColor;
+      border: 2px solid currentColor;
       padding: 8px 14px;
       cursor: pointer;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    button:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    button:hover {
+      background-color: currentColor;
+      color: #fff;
     }
 
     #confirmationMessage {
@@ -102,6 +113,11 @@
     .st0 { fill: #dd0f66; }
     .st1 { fill: #fe7d0b; }
 
+    /* Theme: Magenta */
+    body.theme-magenta button {
+      color: #dd0f66;
+      border-color: #dd0f66;
+    }
     body.theme-magenta .st0,
     body.theme-magenta #themeToggle { color: #dd0f66; }
     body.theme-magenta .st1,
@@ -112,6 +128,11 @@
     body.theme-magenta .st0 { fill: #dd0f66; }
     body.theme-magenta .st1 { fill: #fe7d0b; }
 
+    /* Theme: Orange */
+    body.theme-orange button {
+      color: #fe7d0b;
+      border-color: #fe7d0b;
+    }
     body.theme-orange .st0,
     body.theme-orange #countdown span { color: #dd0f66; }
     body.theme-orange .st1,
