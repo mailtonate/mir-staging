@@ -208,6 +208,38 @@
         0% { opacity: 0; transform: translateY(10px) scale(0.95); }
         100% { opacity: 1; transform: translateY(0) scale(1); }
       }
+
+      @media (max-width: 600px) {
+        body {
+        padding: 0 20px; /* adds horizontal padding */
+        box-sizing: border-box;
+      }
+
+      svg {
+        max-width: 90%; /* scale SVG logo */
+      }
+
+      h1 {
+        font-size: 1.2rem;
+      }
+
+      p, #countdown {
+        font-size: 1rem;
+      }
+
+      input[type="email"] {
+        width: 100%;
+        font-size: 0.95rem;
+      }
+
+      form {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      button {
+        font-size: 0.95rem;
+      }
     }
   </style>
 </head>
