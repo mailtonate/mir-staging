@@ -92,6 +92,77 @@
 
   <!-- Color Theme Toggle -->
   <button id="themeToggle">Rad Toggle</button>
+  <!-- Email Collection Form -->
+<form id="notifyForm" action="https://formspree.io/f/mldbjvva" method="POST">
+  <input type="email" name="email" placeholder="Be first in line when gear drops" required>
+  <button type="submit">Notify Me</button>
+</form>
+
+<!-- Confirmation message -->
+<div id="confirmationMessage" style="display: none;">You're pretty rad! 🔥</div>
+
+<style>
+  form {
+    margin-top: 30px;
+  }
+
+  input[type="email"] {
+    padding: 8px;
+    width: 240px;
+    font-family: 'Rajdhani', sans-serif;
+    border: 1px solid #ccc;
+  }
+
+  button {
+    padding: 8px 14px;
+    font-family: 'Rajdhani', sans-serif;
+    margin-left: 8px;
+    background-color: #eee;
+    border: 1px solid #aaa;
+    cursor: pointer;
+  }
+
+  #confirmationMessage {
+    margin-top: 15px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    color: #28a745;
+    opacity: 1;
+    transition: opacity 1s ease-in-out;
+  }
+
+  .fade-out {
+    opacity: 0;
+  }
+</style>
+
+<script>
+  const form = document.getElementById("notifyForm");
+  const message = document.getElementById("confirmationMessage");
+
+  form.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const data = new FormData(form);
+
+    fetch(form.action, {
+      method: form.method,
+      body: data,
+      headers: { 'Accept': 'application/json' }
+    }).then(response => {
+      if (response.ok) {
+        message.style.display = "block";
+        message.classList.remove("fade-out");
+        form.reset();
+        setTimeout(() => {
+          message.classList.add("fade-out");
+        }, 4000); // start fading after 4 sec
+        setTimeout(() => {
+          message.style.display = "none";
+        }, 5000); // hide after 5 sec
+      }
+    });
+  });
+</script>
 
   <script>
     const targetDate = new Date("October 1, 2025 10:00:00 GMT-0500").getTime();
