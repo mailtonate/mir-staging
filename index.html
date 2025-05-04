@@ -36,15 +36,17 @@
       color: #555;
     }
 
-    #countdown {
-      font-size: 1.5rem;
-      color: #333;
-      margin-top: 20px;
-    }
+   #countdown {
+      font-family: 'Orbitron', sans-serif; /* ⬅ custom font */
+      font-size: 2rem;                     /* ⬅ make larger */
+      color: #dd0f66;                      /* ⬅ make it themed */
+      letter-spacing: 1px;
+  }
 
-    #countdown span {
-      font-weight: bold;
-    }
+  #countdown span {
+    font-weight: 700;
+    color: #fe7d0b;                      /* ⬅ color for numbers */
+  }
 
     #themeToggle {
       margin-top: 25px;
@@ -63,10 +65,15 @@
     body.theme-magenta .st0 { fill: #dd0f66; }
     body.theme-magenta .st1 { fill: #fe7d0b; }
     body.theme-magenta h1 { color: #dd0f66; }
+    body.theme-magenta #countdown { color: #dd0f66; }
+    body.theme-magenta #countdown span { color: #fe7d0b; }
 
     body.theme-orange .st0 { fill: #fe7d0b; }
     body.theme-orange .st1 { fill: #dd0f66; }
     body.theme-orange h1 { color: #fe7d0b; }
+    body.theme-orange #countdown { color: #fe7d0b; }
+    body.theme-orange #countdown span { color: #dd0f66; }
+    
   </style>
 </head>
 <body class="theme-magenta">
