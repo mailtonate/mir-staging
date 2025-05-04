@@ -1,0 +1,41 @@
+name: Deploy from Staging to Production
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on tags like v1.0, v2.1, etc.
+
+jobs:
+  deploy-to-prod:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout staging repo
+        uses: actions/checkout@v3
+        with:
+          repository: mailtonate/mir-staging
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          ref: main
+
+      - name: Copy files to a temp directory
+        run: |
+          mkdir ../prod
+          cp -r . ../prod
+
+      - name: Checkout production repo
+        uses: actions/checkout@v3
+        with:
+          repository: mailtonate/mir_placeholder
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          path: prod
+
+      - name: Deploy files to production
+        run: |
+          rm -rf prod/*
+          cp -r ../prod/* prod/
+          cd prod
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "Deploy from staging tag $GITHUB_REF_NAME" || echo "No changes to commit"
+          git push
