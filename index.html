@@ -255,23 +255,33 @@
       }
     }
 
-      footer {
-        margin-top: 40px;
-        padding: 20px;
-        font-family: 'Rajdhani', sans-serif;
-        font-size: 0.8rem;
-        color: #999;
-        text-align: center;
-      }
+    /* Footer Styles */
+    #siteFooter {
+      margin-top: 40px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.9rem;
+      text-align: center;
+      transition: color 0.3s ease, background-color 0.3s ease;
+    }
 
-      /* Optional: Theme-based color override */
-      body.theme-magenta footer {
-        color: #dd0f66;
-      }
+    /* Footer color for magenta theme */
+    body.theme-magenta #siteFooter {
+      color: #dd0f66;
+    }
 
-      body.theme-orange footer {
+    /* Footer color for orange theme */
+    body.theme-orange #siteFooter {
       color: #fe7d0b;
+    }
+
+    /* Optional: Mobile font size and padding */
+    @media (max-width: 800px) {
+      #siteFooter {
+        font-size: 0.8rem;
+        padding: 10px 20px;
       }
+    }
+
 
   </style>
 </head>
