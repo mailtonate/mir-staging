@@ -372,81 +372,112 @@
   </footer>
   
   <!-- Background code start --!>
-  <!-- Shader Canvas Container -->
-  <div id="shader-bg-container" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;"></div>
+ <!-- Shader Background Canvas -->
+<div id="shader-bg-container" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1; pointer-events:none;"></div>
 
-  <!-- Three.js -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+<!-- Three.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
 
-  <!-- Topographic Shader -->
-  <script id="topo-frag-shader" type="x-shader/x-fragment">
-  precision mediump float;
-  uniform float u_time;
-  uniform vec2 u_resolution;
-  uniform float u_blur;
+<!-- Fragment Shader -->
+<script id="fragShader" type="x-shader/x-fragment">
+precision mediump float;
+uniform vec2 u_resolution;
+uniform float u_time;
+uniform vec2 u_mouse;
+uniform sampler2D u_image;
+uniform float u_opacity;
+uniform float u_blur;
+uniform float u_ripple;
 
-  float topoPattern(vec2 uv) {
-    float lines = sin((uv.y + sin(uv.x * 2.0 + u_time * 0.2)) * 40.0);
-    return smoothstep(0.02, 0.04, abs(lines));
-  }
-
-  void main() {
+void main() {
     vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-    uv.y *= u_resolution.y / u_resolution.x;
 
-    float pattern = topoPattern(uv);
-    vec3 base = vec3(0.05); // dark background
-    vec3 line = vec3(1.0);  // white lines
-
-    vec3 color = mix(base, line, 1.0 - pattern);
-    gl_FragColor = vec4(color, 1.0 - u_blur); // opacity controlled by blur
-  }
-  </script>
-
-  <script>
-  (() => {
-    const enableShader = true;
-    const blurStrength = 0.15; // 0 = opaque, 1 = fully transparent
-    const shaderType = "topo"; // future expansion
-
-    if (!enableShader) return;
-
-    const container = document.getElementById("shader-bg-container");
-    const scene = new THREE.Scene();
-    const camera = new THREE.Camera();
-    const renderer = new THREE.WebGLRenderer({ alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    container.appendChild(renderer.domElement);
-
-    const uniforms = {
-      u_time: { value: 0 },
-      u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-      u_blur: { value: blurStrength }
-    };
-
-    const material = new THREE.ShaderMaterial({
-      fragmentShader: document.getElementById("topo-frag-shader").textContent,
-      uniforms,
-      transparent: true
-    });
-
-    const plane = new THREE.PlaneGeometry(2, 2);
-    const mesh = new THREE.Mesh(plane, material);
-    scene.add(mesh);
-
-    function animate(time) {
-      uniforms.u_time.value = time * 0.001;
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
+    // Maintain aspect ratio like background-size: cover
+    float screenRatio = u_resolution.x / u_resolution.y;
+    float imageRatio = 1152.0 / 768.0; // Your image’s aspect ratio
+    if (screenRatio > imageRatio) {
+        uv.y = (uv.y - 0.5) * (screenRatio / imageRatio) + 0.5;
+    } else {
+        uv.x = (uv.x - 0.5) * (imageRatio / screenRatio) + 0.5;
     }
-    animate();
 
-    window.addEventListener("resize", () => {
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
-    });
-  })();
-  </script>
+    vec4 base = texture2D(u_image, uv);
+
+    // Topo lines
+    float dist = distance(uv, u_mouse);
+    float offset = sin(uv.y * 40.0 + u_ripple * dist * 20.0 - u_time * 0.5);
+    float line = smoothstep(0.01, 0.01 + u_blur, abs(offset));
+
+    vec3 mixed = mix(base.rgb, vec3(1.0), (1.0 - line) * u_opacity);
+    gl_FragColor = vec4(mixed, 1.0);
+}
+</script>
+
+<!-- Shader Initialization -->
+<script>
+(() => {
+  const enableShader = true;
+  const lineOpacity = 0.15;         // topo line visibility
+  const blurAmount = 0.003;         // softness of line edges
+  const rippleStrength = 1.0;       // how strongly lines react to mouse
+  const backgroundImage = 'assets/bg.jpg'; // path to your image
+
+  if (!enableShader) return;
+
+  const container = document.getElementById("shader-bg-container");
+  const scene = new THREE.Scene();
+  const camera = new THREE.Camera();
+  const renderer = new THREE.WebGLRenderer({ alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  container.appendChild(renderer.domElement);
+
+  const uniforms = {
+    u_time: { value: 0 },
+    u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+    u_mouse: { value: new THREE.Vector2(-2, -2) },
+    u_image: { value: null },
+    u_opacity: { value: lineOpacity },
+    u_blur: { value: blurAmount },
+    u_ripple: { value: rippleStrength }
+  };
+
+  const material = new THREE.ShaderMaterial({
+    fragmentShader: document.getElementById("fragShader").textContent,
+    uniforms,
+    transparent: true
+  });
+
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
+  scene.add(mesh);
+
+  // Image Preload
+  const loader = new THREE.TextureLoader();
+  loader.load(backgroundImage, texture => {
+    uniforms.u_image.value = texture;
+    animate(); // start rendering after image is loaded
+  });
+
+  function animate(time) {
+    uniforms.u_time.value = time * 0.001;
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  }
+
+  // Responsive
+  window.addEventListener("resize", () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
+  });
+
+  // Mouse interaction
+  window.addEventListener("mousemove", e => {
+    uniforms.u_mouse.value.set(
+      e.clientX / window.innerWidth,
+      1.0 - e.clientY / window.innerHeight
+    );
+  });
+})();
+</script>
 
 </body>
 </html>
