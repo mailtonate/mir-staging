@@ -371,5 +371,82 @@
     &copy; 2025 Make It Radder LLC. All rights reserved.
   </footer>
   
+  <!-- Background code start --!>
+  <!-- Shader Canvas Container -->
+  <div id="shader-bg-container" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;"></div>
+
+  <!-- Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+
+  <!-- Topographic Shader -->
+  <script id="topo-frag-shader" type="x-shader/x-fragment">
+  precision mediump float;
+  uniform float u_time;
+  uniform vec2 u_resolution;
+  uniform float u_blur;
+
+  float topoPattern(vec2 uv) {
+    float lines = sin((uv.y + sin(uv.x * 2.0 + u_time * 0.2)) * 40.0);
+    return smoothstep(0.02, 0.04, abs(lines));
+  }
+
+  void main() {
+    vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+    uv.y *= u_resolution.y / u_resolution.x;
+
+    float pattern = topoPattern(uv);
+    vec3 base = vec3(0.05); // dark background
+    vec3 line = vec3(1.0);  // white lines
+
+    vec3 color = mix(base, line, 1.0 - pattern);
+    gl_FragColor = vec4(color, 1.0 - u_blur); // opacity controlled by blur
+  }
+  </script>
+
+  <script>
+  (() => {
+    const enableShader = true;
+    const blurStrength = 0.15; // 0 = opaque, 1 = fully transparent
+    const shaderType = "topo"; // future expansion
+
+    if (!enableShader) return;
+
+    const container = document.getElementById("shader-bg-container");
+    const scene = new THREE.Scene();
+    const camera = new THREE.Camera();
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    container.appendChild(renderer.domElement);
+
+    const uniforms = {
+      u_time: { value: 0 },
+      u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+      u_blur: { value: blurStrength }
+    };
+
+    const material = new THREE.ShaderMaterial({
+      fragmentShader: document.getElementById("topo-frag-shader").textContent,
+      uniforms,
+      transparent: true
+    });
+
+    const plane = new THREE.PlaneGeometry(2, 2);
+    const mesh = new THREE.Mesh(plane, material);
+    scene.add(mesh);
+
+    function animate(time) {
+      uniforms.u_time.value = time * 0.001;
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener("resize", () => {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
+    });
+  })();
+  </script>
+
 </body>
 </html>
