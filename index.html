@@ -372,46 +372,55 @@
   </footer>
   
   <!-- Background code start --!>
- <!-- Topographic Shader Background -->
+<!-- Shader Background Canvas -->
 <div id="shader-bg-container" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1; pointer-events:none;"></div>
 
-<!-- Three.js -->
+<!-- Three.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
 
-<!-- Shader Script -->
-<script id="topo-frag-shader" type="x-shader/x-fragment">
+<!-- Fragment Shader -->
+<script id="fragShader" type="x-shader/x-fragment">
 precision mediump float;
-uniform float u_time;
 uniform vec2 u_resolution;
+uniform float u_time;
 uniform vec2 u_mouse;
+uniform sampler2D u_image;
 uniform float u_opacity;
-
-float contour(vec2 uv, float frequency, float width) {
-    return smoothstep(0.0, width, abs(sin(uv.y * frequency)));
-}
+uniform float u_blur;
+uniform float u_ripple;
 
 void main() {
     vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-    uv.y *= u_resolution.y / u_resolution.x;
 
-    // Mouse ripple
+    // Maintain aspect ratio like background-size: cover
+    float screenRatio = u_resolution.x / u_resolution.y;
+    float imageRatio = 1152.0 / 768.0; // Your image’s aspect ratio
+    if (screenRatio > imageRatio) {
+        uv.y = (uv.y - 0.5) * (screenRatio / imageRatio) + 0.5;
+    } else {
+        uv.x = (uv.x - 0.5) * (imageRatio / screenRatio) + 0.5;
+    }
+
+    vec4 base = texture2D(u_image, uv);
+
+    // Topo lines
     float dist = distance(uv, u_mouse);
-    float ripple = sin(uv.y * 40.0 + dist * 50.0 - u_time * 2.0);
-    float pattern = smoothstep(0.02, 0.04, abs(ripple));
+    float offset = sin(uv.y * 40.0 + u_ripple * dist * 20.0 - u_time * 0.5);
+    float line = smoothstep(0.01, 0.01 + u_blur, abs(offset));
 
-    vec3 base = vec3(0.0);       // dark background (transparent)
-    vec3 lines = vec3(1.0);      // white lines
-
-    vec3 color = mix(lines, base, pattern);
-    gl_FragColor = vec4(color, u_opacity);
+    vec3 mixed = mix(base.rgb, vec3(1.0), (1.0 - line) * u_opacity);
+    gl_FragColor = vec4(mixed, 1.0);
 }
 </script>
 
+<!-- Shader Initialization -->
 <script>
 (() => {
   const enableShader = true;
-  const lineOpacity = 0.1; // 0 = invisible, 1 = solid
-  const shaderType = "topo"; // future-proof
+  const lineOpacity = 0.15;         // topo line visibility
+  const blurAmount = 0.1;         // softness of line edges
+  const rippleStrength = 1.0;       // how strongly lines react to mouse
+  const backgroundImage = 'mirbg.png'; // path to your image
 
   if (!enableShader) return;
 
@@ -426,11 +435,14 @@ void main() {
     u_time: { value: 0 },
     u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
     u_mouse: { value: new THREE.Vector2(-2, -2) },
-    u_opacity: { value: lineOpacity }
+    u_image: { value: null },
+    u_opacity: { value: lineOpacity },
+    u_blur: { value: blurAmount },
+    u_ripple: { value: rippleStrength }
   };
 
   const material = new THREE.ShaderMaterial({
-    fragmentShader: document.getElementById("topo-frag-shader").textContent,
+    fragmentShader: document.getElementById("fragShader").textContent,
     uniforms,
     transparent: true
   });
@@ -438,20 +450,27 @@ void main() {
   const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
   scene.add(mesh);
 
+  // Image Preload
+  const loader = new THREE.TextureLoader();
+  loader.load(backgroundImage, texture => {
+    uniforms.u_image.value = texture;
+    animate(); // start rendering after image is loaded
+  });
+
   function animate(time) {
     uniforms.u_time.value = time * 0.001;
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
   }
-  animate();
 
+  // Responsive
   window.addEventListener("resize", () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
   });
 
-  // Track mouse in normalized screen space
-  window.addEventListener("mousemove", (e) => {
+  // Mouse interaction
+  window.addEventListener("mousemove", e => {
     uniforms.u_mouse.value.set(
       e.clientX / window.innerWidth,
       1.0 - e.clientY / window.innerHeight
@@ -459,6 +478,7 @@ void main() {
   });
 })();
 </script>
+
 
 </body>
 </html>
