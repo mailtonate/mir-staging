@@ -283,6 +283,37 @@
     }
   }
 
+  html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+
+.radder-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('mirbg.png'); /* update path */
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  z-index: -1;
+  filter: blur(3px) brightness(70%); /* you can adjust this */
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: white;
+  text-shadow: 0 0 8px rgba(0,0,0,0.7);
+  padding: 40px;
+}
+
 
   </style>
 </head>
@@ -372,112 +403,14 @@
   </footer>
   
   <!-- Background code start --!>
-<!-- Shader Background Canvas -->
-<div id="shader-bg-container" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1; pointer-events:none;"></div>
+<!-- CSS Background Container -->
+<div class="radder-bg"></div>
 
-<!-- Three.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
-
-<!-- Fragment Shader -->
-<script id="fragShader" type="x-shader/x-fragment">
-precision mediump float;
-uniform vec2 u_resolution;
-uniform float u_time;
-uniform vec2 u_mouse;
-uniform sampler2D u_image;
-uniform float u_opacity;
-uniform float u_blur;
-uniform float u_ripple;
-
-void main() {
-    vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-
-    // Maintain aspect ratio like background-size: cover
-    float screenRatio = u_resolution.x / u_resolution.y;
-    float imageRatio = 1152.0 / 768.0; // Your image’s aspect ratio
-    if (screenRatio > imageRatio) {
-        uv.y = (uv.y - 0.5) * (screenRatio / imageRatio) + 0.5;
-    } else {
-        uv.x = (uv.x - 0.5) * (imageRatio / screenRatio) + 0.5;
-    }
-
-    vec4 base = texture2D(u_image, uv);
-
-    // Topo lines
-    float dist = distance(uv, u_mouse);
-    float offset = sin(uv.y * 40.0 + u_ripple * dist * 20.0 - u_time * 0.5);
-    float line = smoothstep(0.01, 0.01 + u_blur, abs(offset));
-
-    vec3 mixed = mix(base.rgb, vec3(1.0), (1.0 - line) * u_opacity);
-    gl_FragColor = vec4(mixed, 1.0);
-}
-</script>
-
-<!-- Shader Initialization -->
-<script>
-(() => {
-  const enableShader = true;
-  const lineOpacity = 0.15;         // topo line visibility
-  const blurAmount = 0.1;         // softness of line edges
-  const rippleStrength = 1.0;       // how strongly lines react to mouse
-  const backgroundImage = 'mirbg.png'; // path to your image
-
-  if (!enableShader) return;
-
-  const container = document.getElementById("shader-bg-container");
-  const scene = new THREE.Scene();
-  const camera = new THREE.Camera();
-  const renderer = new THREE.WebGLRenderer({ alpha: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  container.appendChild(renderer.domElement);
-
-  const uniforms = {
-    u_time: { value: 0 },
-    u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-    u_mouse: { value: new THREE.Vector2(-2, -2) },
-    u_image: { value: null },
-    u_opacity: { value: lineOpacity },
-    u_blur: { value: blurAmount },
-    u_ripple: { value: rippleStrength }
-  };
-
-  const material = new THREE.ShaderMaterial({
-    fragmentShader: document.getElementById("fragShader").textContent,
-    uniforms,
-    transparent: true
-  });
-
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
-  scene.add(mesh);
-
-  // Image Preload
-  const loader = new THREE.TextureLoader();
-  loader.load(backgroundImage, texture => {
-    uniforms.u_image.value = texture;
-    animate(); // start rendering after image is loaded
-  });
-
-  function animate(time) {
-    uniforms.u_time.value = time * 0.001;
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate);
-  }
-
-  // Responsive
-  window.addEventListener("resize", () => {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
-  });
-
-  // Mouse interaction
-  window.addEventListener("mousemove", e => {
-    uniforms.u_mouse.value.set(
-      e.clientX / window.innerWidth,
-      1.0 - e.clientY / window.innerHeight
-    );
-  });
-})();
-</script>
+<!-- Your Main Page Content -->
+<div class="content">
+  <h1>Radder Gear Coming Soon</h1>
+  <p>Fall 2025</p>
+</div>
 
 
 </body>
