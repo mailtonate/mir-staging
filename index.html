@@ -90,8 +90,8 @@
       width: 240px;
       font-family: 'Rajdhani', sans-serif;
       font-size: 1rem;
-      color: #222;
-      background-color: #fff;
+      color: #0d0d0d;
+      background-color: #e6e6e6;
       border: 1px solid #ccc;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -165,6 +165,25 @@
     body.theme-orange .st0 { fill: #fe7d0b; }
     body.theme-orange .st1 { fill: #dd0f66; }
 
+    #confirmationMessage {
+    margin-top: 15px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.2rem;         /* Adjusted font size */
+    color: #dd0f66;           /* theme magenta color */
+    padding: 10px 20px;       /* Add padding for better spacing */
+    border-radius: 5px;       /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    opacity: 1;
+    transition: opacity 1s ease-in-out, transform 0.3s ease;
+    display: none;            /* Hidden by default */
+    }
+
+    #confirmationMessage.show {
+    display: block;           /* Make it visible */
+    transform: scale(1.05);   /* Slight pop-up effect */
+    }
+
+    
     /* Tooltip */
     .rad-toggle-wrapper {
       position: relative;
@@ -321,7 +340,7 @@
   background-position: center center;
   background-repeat: no-repeat;
   z-index: -1;
-  filter: blur(2px) brightness(70%); /* you can adjust this */
+  filter: blur(1px) brightness(70%); /* you can adjust this */
   pointer-events: none;
 }
 
